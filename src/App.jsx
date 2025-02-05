@@ -74,3 +74,18 @@ function App() {
 }
 
 export default App;
+
+// BACKEND:
+// 1. navigate to the folder 'backend' (cd backend), open git bash terminal there
+// 2. npm install - run command inside of the backend terminal, because backend has special dependencies
+// (like body-parser) 
+// 3. node app.js - run this to start local backend server on port 3000 (different from frontend server)
+// 4. on http://localhost:3000  there will be a backend server running (at begin, it has no content, but runs)
+
+// FRONTEND:
+// 5. navigate to the main project folder, open another git bash terminal there (2nd one)
+// 6. npm install  to install all project dependencies (for frontend)
+// 7. npm run dev - run this to start local frontend server on port 5173 (different port for frontend and backend)
+// 8. on http://localhost:5173/ there will be a frontend server running. 
+
+// ** keep both processes (front- & back-end running while coding)
