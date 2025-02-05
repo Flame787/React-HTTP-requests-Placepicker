@@ -1,3 +1,5 @@
+// calculation for sorting the places by distance from the user's location (nearest to farthest):
+
 function toRad(value) {
   return (value * Math.PI) / 180;
 }
