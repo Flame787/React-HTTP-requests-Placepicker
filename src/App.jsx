@@ -1,10 +1,11 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from "react";
 
-import Places from './components/Places.jsx';
-import Modal from './components/Modal.jsx';
-import DeleteConfirmation from './components/DeleteConfirmation.jsx';
-import logoImg from './assets/logo.png';
-import AvailablePlaces from './components/AvailablePlaces.jsx';
+import Places from "./components/Places.jsx";
+import Modal from "./components/Modal.jsx";
+import DeleteConfirmation from "./components/DeleteConfirmation.jsx";
+import logoImg from "./assets/logo.png";
+import AvailablePlaces from "./components/AvailablePlaces.jsx";
+import { updateUserPlaces } from "./http.js";
 
 function App() {
   const selectedPlace = useRef();
@@ -22,7 +23,7 @@ function App() {
     setModalIsOpen(false);
   }
 
-  function handleSelectPlace(selectedPlace) {
+  async function handleSelectPlace(selectedPlace) {
     setUserPlaces((prevPickedPlaces) => {
       if (!prevPickedPlaces) {
         prevPickedPlaces = [];
@@ -32,6 +33,15 @@ function App() {
       }
       return [selectedPlace, ...prevPickedPlaces];
     });
+
+    try {
+      // sending our updated state (changed data) to the backend: fetch() - in http.js helper-file:
+      await updateUserPlaces([selectedPlace, ...userPlaces]);
+      // adding newly seleceted place infront of old saved places -> sending updated state of data to our backend
+      // this operation takes some time, so we can add 'await', but then handleSelectPlace-function should have 'async'
+    } catch (error) {
+      // ..
+    }
   }
 
   const handleRemovePlace = useCallback(async function handleRemovePlace() {
@@ -68,6 +78,7 @@ function App() {
         />
 
         <AvailablePlaces onSelectPlace={handleSelectPlace} />
+        {/* event-listener function, triggered whenever we select a place */}
       </main>
     </>
   );
@@ -78,16 +89,15 @@ export default App;
 // BACKEND:
 // 1. navigate to the folder 'backend' (cd backend), open git bash terminal there
 // 2. npm install - run command inside of the backend terminal, because backend has special dependencies
-// (like body-parser) 
+// (like body-parser)
 // 3. node app.js - run this to start local backend server on port 3000 (different from frontend server)
 // 4. on http://localhost:3000  there will be a backend server running (at begin, it has no content, but runs)
 // although main endpoint is empty, there are different endpoints like http://localhost:3000/places filled with data
-
 
 // FRONTEND:
 // 5. navigate to the main project folder, open another git bash terminal there (2nd one)
 // 6. npm install  to install all project dependencies (for frontend)
 // 7. npm run dev - run this to start local frontend server on port 5173 (different port for frontend and backend)
-// 8. on http://localhost:5173/ there will be a frontend server running. 
+// 8. on http://localhost:5173/ there will be a frontend server running.
 
 // ** keep both processes (front- & back-end running while coding)

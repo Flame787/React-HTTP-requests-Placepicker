@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import Places from "./Places.jsx";
 import Error from "./Error.jsx";
 
+import { sortPlacesByDistance } from "../loc.js";
+import { fetchAvailablePlaces } from "../http.js";
+
 // const places = localStorage.getItem("places");
 
 export default function AvailablePlaces({ onSelectPlace }) {
@@ -33,18 +36,38 @@ export default function AvailablePlaces({ onSelectPlace }) {
       setIsFetching(true);
 
       try {
-        const response = await fetch("http://localhost:3000/places");
-        const resData = await response.json();
+        // const response = await fetch("http://localhost:3000/places");
+        // const resData = await response.json();
 
-        // managing error as response:
-        // if (response.ok) -> if this is true => 200 or 300 response / if false => 400 or 500 response
-        if (!response.ok) {
-          throw new Error("Failed to fetch places.");
-          // but when we throw the error, we will crash the application!
-          // to avoid app crash, we should wrap the error-code with 'try' and then define which code should be executed instead
-        }
+        // // managing error as response:
+        // // if (response.ok) -> if this is true => 200 or 300 response / if false => 400 or 500 response
+        // if (!response.ok) {
+        //   throw new Error("Failed to fetch places.");
+        //   // but when we throw the error, we will crash the application!
+        //   // to avoid app crash, we should wrap the error-code with 'try' and then define which code should be executed instead
+        // }
 
-        setAvailablePlaces(resData.places);
+        const places = await fetchAvailablePlaces();   
+        // await -> because it's an async-function, it will return a promise
+
+        // adding navigator-object (built into the browser) with geolocation-object - for getting user's location.
+        //  getCurrentPosition will take some time until executed,
+        // callback is a function which will be executed once the pposition is there:
+        navigator.geolocation.getCurrentPosition((position) => {
+          const sortedPlaces = sortPlacesByDistance(
+            
+            places,    // before: resData.places,
+            position.coords.latitude,
+            position.coords.longitude
+          );
+          // calling the function imported from loc.js, and passing our resData to it
+
+          // setAvailablePlaces(resData.places);
+          setAvailablePlaces(sortedPlaces);
+          // we used the fetched data (resData.places), and sorted them according to distance from user's location
+
+          setIsFetching(false);
+        });
       } catch (error) {
         // handling the error - show error message on the user interface - we also need state for error handling
         setError({
@@ -53,9 +76,16 @@ export default function AvailablePlaces({ onSelectPlace }) {
         });
         // we are stting this error-object (containing error-message) as value for error-state
         // we either show the error-text, or || if this is not existing, we define our own custom error-text
+
+        // additionally, also changing the state here, in case we had an error:
+        setIsFetching(false);
       }
 
-      setIsFetching(false); // lastly, we want to end the loading state, no matter if we get data or an error.
+      // setIsFetching(false);
+      // lastly, we want to end the loading state, no matter if we get data or an error.
+      // but after we added navigator.geoposition-related sorting, this code would execute too early,
+      // before the callback-function is done (right after we initiate the getCurrentPosition(position ...)).
+      // so we have to move it inside, after setAvailablePlaces(sortedPlaces);
     }
     fetchPlaces();
   }, []);
