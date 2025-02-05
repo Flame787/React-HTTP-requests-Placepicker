@@ -81,6 +81,8 @@ export default App;
 // (like body-parser) 
 // 3. node app.js - run this to start local backend server on port 3000 (different from frontend server)
 // 4. on http://localhost:3000  there will be a backend server running (at begin, it has no content, but runs)
+// although main endpoint is empty, there are different endpoints like http://localhost:3000/places filled with data
+
 
 // FRONTEND:
 // 5. navigate to the main project folder, open another git bash terminal there (2nd one)

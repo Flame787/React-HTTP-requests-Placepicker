@@ -10,6 +10,8 @@ export default function Places({ title, places, fallbackText, onSelectPlace }) {
             <li key={place.id} className="place-item">
               <button onClick={() => onSelectPlace(place)}>
                 <img src={`http://localhost:3000/${place.image.src}`} alt={place.image.alt} />
+                {/* constructing the img-source by getting to the http-endpoint + adding variable part ${}
+                -> all wrapped with backticks ` ` -> so we created full url-address as an img-source */}
                 <h3>{place.title}</h3>
               </button>
             </li>
