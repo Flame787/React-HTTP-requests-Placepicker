@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from "react";
 
 import Places from "./components/Places.jsx";
 import Modal from "./components/Modal.jsx";
+import Error from "./components/Error.jsx";
 import DeleteConfirmation from "./components/DeleteConfirmation.jsx";
 import logoImg from "./assets/logo.png";
 import AvailablePlaces from "./components/AvailablePlaces.jsx";
@@ -11,6 +12,8 @@ function App() {
   const selectedPlace = useRef();
 
   const [userPlaces, setUserPlaces] = useState([]);
+
+  const [errorUpdatingPlaces, setErrorUpdatingPlaces] = useState();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -23,6 +26,8 @@ function App() {
     setModalIsOpen(false);
   }
 
+  // optimistic updating: updating my local state before sending the request and before waiting for response
+  // - sometimes provides better user experience (instead of a loader-animation, there is immediatelly some constent on the page)
   async function handleSelectPlace(selectedPlace) {
     setUserPlaces((prevPickedPlaces) => {
       if (!prevPickedPlaces) {
@@ -40,20 +45,59 @@ function App() {
       // adding newly seleceted place infront of old saved places -> sending updated state of data to our backend
       // this operation takes some time, so we can add 'await', but then handleSelectPlace-function should have 'async'
     } catch (error) {
-      // ..
+      setUserPlaces(userPlaces);
+      // if it comes to error (updating user-palces failes), just set user-palces to already existing user-places
+      // (we rollback the change)
+      setErrorUpdatingPlaces({
+        message: error.message || "Failed to update places.",
+      });
     }
   }
 
-  const handleRemovePlace = useCallback(async function handleRemovePlace() {
-    setUserPlaces((prevPickedPlaces) =>
-      prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id)
-    );
+  const handleRemovePlace = useCallback(
+    async function handleRemovePlace() {
+      setUserPlaces((prevPickedPlaces) =>
+        prevPickedPlaces.filter(
+          (place) => place.id !== selectedPlace.current.id
+        )
+      );
 
-    setModalIsOpen(false);
-  }, []);
+      try {
+        // optimistic updating - 1st updating the state, then sending http-request
+        await updateUserPlaces(
+          userPlaces.filter((place) => place.id !== selectedPlace.current.id)
+        );
+      } catch (error) {
+        setUserPlaces(userPlaces); // rollback the change, set user-places to the old user-places, before update
+        setErrorUpdatingPlaces({
+          message: error.message || "Failed to delete place.",
+        });
+      }
+
+      setModalIsOpen(false);
+    },
+    [userPlaces]
+  );
+  // added as dependancy because we filter it in previous code - if changed, then this function needs to be recreated
+  // then this function sends new data to the backend
+
+  function handleError() {
+    setErrorUpdatingPlaces(null); // clearing the error back to null
+  }
 
   return (
     <>
+      <Modal open={errorUpdatingPlaces} onClose={handleError}>
+        {/* onClose - by pressing the Esc key */}
+        {errorUpdatingPlaces && (
+          <Error // conditionally, only if errorUpdatingPlaces is truethy, Error will show up
+            title="An error occured!"
+            message={errorUpdatingPlaces.message}
+            onConfirm={handleError} // when user clicks to close the modal, error is cleaned, dissapears
+          />
+        )}
+      </Modal>
+
       <Modal open={modalIsOpen} onClose={handleStopRemovePlace}>
         <DeleteConfirmation
           onCancel={handleStopRemovePlace}

@@ -25,7 +25,7 @@ export async function updateUserPlaces(places) {
     // body: JSON.stringify({places: places}),
     body: JSON.stringify({ places }), // shortcut {places}, if key and value have same names: {places: places}
     // {places} must be wrapped with {}, & added a key 'places', & places added as a value.
-    // user-places.json file is not empty anymore, it gets populated with locations the user has picked:
+    // -> user-places.json file is not empty anymore, it gets populated with locations the user has picked:
     // f.e. [{"id":"p7","title":"Northern Lights","image":{"src":"northern-lights.jpg","alt":"Dazzling display of the Northern Lights in a starry sky."},"lat":64.9631,"lon":-19.0208},{"id":"p10","title":"Parisian Streets","image":{"src":"parisian-streets.jpg","alt":"Charming streets of Paris with historic buildings and cafes."},"lat":48.8566,"lon":2.3522},{"id":"p1","title":"Forest Waterfall","image":{"src":"forest-waterfall.jpg","alt":"A tranquil forest with a cascading waterfall amidst greenery."},"lat":44.5588,"lon":-80.344}]
     headers: {
       "Content-type": "application/json",
