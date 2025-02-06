@@ -15,6 +15,18 @@ export async function fetchAvailablePlaces() {
   return resData.places;
 }
 
+// to enable fetching data about already added places (at next reload):
+export async function fetchUserPlaces() {
+  const response = await fetch("http://localhost:3000/user-places");
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user places.");
+  }
+
+  return resData.places;
+}
+
 // sending our updated state (changed data) to the backend - new function for updating user's places:
 export async function updateUserPlaces(places) {
   // we are expecting to get an array of places, which should be sent to backend
